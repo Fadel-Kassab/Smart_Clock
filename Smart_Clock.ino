@@ -1,4 +1,4 @@
-//Smart Clock
+ //Smart Clock
 //Project By Fadel Kassab
 //Grapotronics
 
@@ -31,7 +31,7 @@ String amPm[] = {"AM", "PM"};
 
 unsigned long previousBtn = 0;
 unsigned long eventBtn = 200;
-unsigned long eventClock = 60000; // 200
+unsigned long eventClock = 200; // 60000
 unsigned long previousClock = 0;
 
 /* phrases page 1 */
@@ -84,6 +84,12 @@ bool addPhrase = true;
 bool addClock = true;
 bool addTmp = true;
 
+bool initialHmd = true;
+bool initialTmp = true;
+bool initialClock = true;
+bool initialPhrase = true;
+bool stored_values = false;
+
 /* Style set  */
 int colClockStyle = 0;
 int rowClockStyle = 0;
@@ -102,11 +108,6 @@ int colPhraseFull;
 
 int longestInArr = 5; // length of longest phrase in array
 int prefPhraseLen = userPrefPhrase.length();
-
-bool modifiedHmd = false;
-bool modifiedTmp = false;
-bool modifiedClock = false;
-bool modifiedPhrase = false;
 
 String remAll = "       ";
 
@@ -1002,478 +1003,411 @@ void loop(void)
     /* Custom style select page */
     else if(page == 8)
     {
-     if(scrolled == true)
-     {
-      lcd.setCursor(0, 0);
-      lcd.print("HUMID");
-      lcd.setCursor(9, 0);
-      lcd.print("TEMP");
-      lcd.setCursor(0, 1);
-      lcd.print("SAVE");
-      lcd.setCursor(8, 1);
-      lcd.print("REPLACE");
-      if(addHmd == true)
-      {
-        lcd.setCursor(5, 0);
-        lcd.write(byte(4));
-      }
-      else
-      {
-        lcd.setCursor(5, 0);
-        lcd.print(" ");
-      }
+      store_initial_state();
       
-      if(addTmp == true)
+      if(scrolled == true)
       {
-        lcd.setCursor(13, 0);
-        lcd.write(byte(4));
-      }
-      else
-      {
-        lcd.setCursor(13, 0);
-        lcd.print(" ");
-      }
-      
-      switch(option)
-      {
-        case 2:
-        lcd.setCursor(6, 0);
-          break;
-
-        case 3:
-        lcd.setCursor(14, 0);
-          break;
-
-        case 4:
-        lcd.setCursor(4, 1);
-          break;
-
-        case 5:
-        lcd.setCursor(15, 1);
-          break;
-      }
-      lcd.print("<");
-     
-     if(digitalRead(lBtn) == LOW || digitalRead(rBtn) == LOW)
-     {
-      switch(option)
-      {
-        case 2:
-          lcd.setCursor(6, 0);
+        lcd.setCursor(0, 0);
+        lcd.print("HUMID");
+        lcd.setCursor(9, 0);
+        lcd.print("TEMP");
+        lcd.setCursor(0, 1);
+        lcd.print("EXIT");
+        lcd.setCursor(9, 1);
+        lcd.print("NEXT");
+        
+        if(addHmd == true)
+        {
+          lcd.setCursor(5, 0);
+          lcd.write(byte(4));
+        }
+        else
+        {
+          lcd.setCursor(5, 0);
           lcd.print(" ");
-          option = 3;
-          break;
-
-        case 3:
-          lcd.setCursor(14, 0);
+        }
+        
+        if(addTmp == true)
+        {
+          lcd.setCursor(13, 0);
+          lcd.write(byte(4));
+        }
+        else
+        {
+          lcd.setCursor(13, 0);
           lcd.print(" ");
-          option = 2;
-          break;
-
-        case 4:
-          lcd.setCursor(4, 1);
-          lcd.print(" ");
-          option = 5;
-          break;
-
-        case 5:
-          lcd.setCursor(15, 1);
-          lcd.print(" ");
-          option = 4;
-          break;
-      }
-     }
-
-     else if(digitalRead(upBtn) == LOW)
-     {
+        }
+        
         switch(option)
         {
           case 2:
-            scrolled = false;
-            option = 0;
-            lcd.clear();
+          lcd.setCursor(6, 0);
             break;
-
+  
           case 3:
-            scrolled = false;
-            option = 1;
-            lcd.clear();
+          lcd.setCursor(14, 0);
             break;
-
+  
           case 4:
-            lcd.setCursor(4, 1);
-            lcd.print(" ");
-            option = 2;
+          lcd.setCursor(4, 1);
             break;
-
+  
           case 5:
-            lcd.setCursor(15, 1);
-            lcd.print(" ");
-            option = 3;
+          lcd.setCursor(13, 1);
             break;
         }
-     }
-
-     else if(digitalRead(downBtn) == LOW)
-     {
+        lcd.print("<");
+       
+       if(digitalRead(lBtn) == LOW || digitalRead(rBtn) == LOW)
+       {
         switch(option)
         {
           case 2:
             lcd.setCursor(6, 0);
             lcd.print(" ");
-            option = 4;
+            option = 3;
             break;
-
+  
           case 3:
             lcd.setCursor(14, 0);
             lcd.print(" ");
-            option = 5;
-            break;
-
-          case 4:
-            scrolled = false;
-            option = 0;
-            lcd.clear();
-            break;
-
-          case 5:
-            scrolled = false;
-            option = 1;
-            lcd.clear();
-            break;
-        }
-     }
-
-     else if(digitalRead(ctrlBtn) == LOW)
-     {
-        switch(option)
-        {
-          case 2:
-            if(addHmd == true)
-            {
-              addHmd = false;
-            }
-            
-            else
-            {
-              if(check_and_locate("Hmd") == true)
-              {
-                addHmd = true;
-              }
-
-              else
-              {
-                lcd.clear();
-                page = 20;
-              }
-            }
-            break;
-
-          case 3:
-            if(addTmp == true)
-            {
-              addTmp = false;
-            }
-            
-            else
-            {
-              if(check_and_locate("Tmp") == true)
-              {
-                addTmp = true;
-              }
-
-              else
-              {
-                lcd.clear();
-                page = 20;
-              }
-            }
-            break;
-
-          case 4:
-            lcd.clear();
-            colMenuArrow = 0;
-            rowMenuArrow = 0;
-            scrolled = false;
-            option = 0;
-            page = 1;
-            break;
-
-          case 5:
-            lcd.clear();
-            scrolled = false;
-            option = 0;
-            page = 9;
-            rowClockStyle = 0;
-            colClockStyle = 0;
-            break;
-        }
-     }
-    }
-
-     else if(scrolled == false)
-     {
-      lcd.setCursor(0, 0);
-      lcd.print("CLOCK");
-      lcd.setCursor(0, 1);
-      lcd.print("HUMID");
-      lcd.setCursor(9, 0);
-      lcd.print("QUOTE");
-      lcd.setCursor(9, 1);
-      lcd.print("TEMP");
-
-      if(addClock == true)
-      {
-        lcd.setCursor(5, 0);
-        lcd.write(byte(4));
-      }
-      else
-      {
-        lcd.setCursor(5, 0);
-        lcd.print(" ");
-      }
-      
-      if(addHmd == true)
-      {
-        lcd.setCursor(5, 1);
-        lcd.write(byte(4));  
-      }
-      else
-      {
-        lcd.setCursor(5, 1);
-        lcd.print(" ");
-      }
-      
-      if(addPhrase == true)
-      {
-        lcd.setCursor(14, 0);
-        lcd.write(byte(4)); 
-      }
-      else
-      {
-        lcd.setCursor(14, 0);
-        lcd.print(" ");
-      }
-      
-      if(addTmp == true)
-      {
-        lcd.setCursor(13, 1);
-        lcd.write(byte(4));
-      }
-      else
-      {
-        lcd.setCursor(13, 1);
-        lcd.print(" ");
-      }
-
-      switch(option)
-      {
-        case 0:
-          lcd.setCursor(6, 0);
-          break;
-          
-        case 1:
-          lcd.setCursor(15, 0);
-          break;
-          
-        case 2:
-          lcd.setCursor(6, 1);
-          break;
-          
-        case 3:
-          lcd.setCursor(14, 1);
-          break; 
-      }
-      lcd.print("<");
-     
-      if(digitalRead(upBtn) == LOW)
-      {
-        switch(option)
-        {
-          case 0:
-            scrolled = true;
-            option = 4;
-            lcd.clear();
-            break;
-            
-          case 1:
-            scrolled = true;
-            option = 5;
-            lcd.clear();
-            break;
-            
-          case 2:
-            lcd.setCursor(6, 1);
-            option = 0;
-            break;
-            
-          case 3:
-            lcd.setCursor(14, 1);
-            option = 1;
-            break;
-        }
-        lcd.print(" ");
-      }
-
-      else if(digitalRead(downBtn) == LOW)
-      {
-        switch(option)
-        {
-          case 0:
-            lcd.setCursor(6, 0);
             option = 2;
             break;
-
-          case 1:
-            lcd.setCursor(15, 0);
-            option = 3;
-            break;
-
-          case 2:
-            scrolled = true;
-            option = 4;
-            lcd.clear();
-            break;
-
-          case 3:
-            scrolled = true;
+  
+          case 4:
+            lcd.setCursor(4, 1);
+            lcd.print(" ");
             option = 5;
-            lcd.clear();
+            break;
+  
+          case 5:
+            lcd.setCursor(13, 1);
+            lcd.print(" ");
+            option = 4;
             break;
         }
-        lcd.print(" ");
-      }
-
+       }
+  
+       else if(digitalRead(upBtn) == LOW)
+       {
+          switch(option)
+          {
+            case 2:
+              scrolled = false;
+              option = 0;
+              lcd.clear();
+              break;
+  
+            case 3:
+              scrolled = false;
+              option = 1;
+              lcd.clear();
+              break;
+  
+            case 4:
+              lcd.setCursor(4, 1);
+              lcd.print(" ");
+              option = 2;
+              break;
+  
+            case 5:
+              lcd.setCursor(13, 1);
+              lcd.print(" ");
+              option = 3;
+              break;
+          }
+       }
+  
+       else if(digitalRead(downBtn) == LOW)
+       {
+          switch(option)
+          {
+            case 2:
+              lcd.setCursor(6, 0);
+              lcd.print(" ");
+              option = 4;
+              break;
+  
+            case 3:
+              lcd.setCursor(14, 0);
+              lcd.print(" ");
+              option = 5;
+              break;
+  
+            case 4:
+              scrolled = false;
+              option = 0;
+              lcd.clear();
+              break;
+  
+            case 5:
+              scrolled = false;
+              option = 1;
+              lcd.clear();
+              break;
+          }
+       }
+  
       else if(digitalRead(ctrlBtn) == LOW)
       {
         switch(option)
         {
-          case 0:
-            if(addClock == true)
-            {
-              addClock = false;
-            }
-            
-            else
-            {
-              if(check_and_locate("Clock") == true)
-              {
-                addClock = true;
-              }
-
-              else
-              {
-                lcd.clear();
-                page = 20;
-              }
-            }
-            break;
-          
-          case 1:
-            if(addPhrase == true)
-            {
-              addPhrase = false;
-            }
-            
-            else
-            {
-              if(check_and_locate("Phrase") == true)
-              {
-                addPhrase = true;
-              }
-
-              else
-              {
-                lcd.clear();
-                page = 20;
-              }
-            }
-          break;
-          
           case 2:
-            if(addHmd == true)
+            if(addHmd == false)
+            {
+              addHmd = true;
+            }
+
+            else
             {
               addHmd = false;
             }
+            break;
             
-            else
-            {
-              if(check_and_locate("Hmd") == true)
-              {
-                addHmd = true;
-              }
-
-              else
-              {
-                lcd.clear();
-                page = 20;
-              }
-            }
-          break;
-          
           case 3:
             if(addTmp == true)
             {
               addTmp = false;
             }
-            
+
             else
             {
-              if(check_and_locate("Tmp") == true)
-              {
-                addTmp = true;
-              }
-
-              else
-              {
-                lcd.clear();
-                page = 20;
-              }
+              addTmp = true;
             }
-          break;
+            break;
+
+          case 4:
+            style_menu_to_home();
+            break;
+          
+          case 5:
+            customize();
+            break;
         }
       }
-
-      if(digitalRead(rBtn) == LOW || digitalRead(lBtn) == LOW)
-      {
+    }
+  
+       else if(scrolled == false)
+       {
+        lcd.setCursor(0, 0);
+        lcd.print("CLOCK");
+        lcd.setCursor(0, 1);
+        lcd.print("HUMID");
+        lcd.setCursor(9, 0);
+        lcd.print("QUOTE");
+        lcd.setCursor(9, 1);
+        lcd.print("TEMP");
+  
+        if(addClock == true)
+        {
+          lcd.setCursor(5, 0);
+          lcd.write(byte(4));
+        }
+        else
+        {
+          lcd.setCursor(5, 0);
+          lcd.print(" ");
+        }
+        
+        if(addHmd == true)
+        {
+          lcd.setCursor(5, 1);
+          lcd.write(byte(4));  
+        }
+        else
+        {
+          lcd.setCursor(5, 1);
+          lcd.print(" ");
+        }
+        
+        if(addPhrase == true)
+        {
+          lcd.setCursor(14, 0);
+          lcd.write(byte(4)); 
+        }
+        else
+        {
+          lcd.setCursor(14, 0);
+          lcd.print(" ");
+        }
+        
+        if(addTmp == true)
+        {
+          lcd.setCursor(13, 1);
+          lcd.write(byte(4));
+        }
+        else
+        {
+          lcd.setCursor(13, 1);
+          lcd.print(" ");
+        }
+  
         switch(option)
         {
           case 0:
             lcd.setCursor(6, 0);
-            option = 1;
             break;
             
           case 1:
             lcd.setCursor(15, 0);
-            option = 0;
             break;
             
           case 2:
             lcd.setCursor(6, 1);
-            option = 3;
             break;
             
           case 3:
             lcd.setCursor(14, 1);
-            option = 2;
-            break;
+            break; 
         }
-        lcd.print(" "); 
+        lcd.print("<");
+       
+        if(digitalRead(upBtn) == LOW)
+        {
+          switch(option)
+          {
+            case 0:
+              scrolled = true;
+              option = 4;
+              lcd.clear();
+              break;
+              
+            case 1:
+              scrolled = true;
+              option = 5;
+              lcd.clear();
+              break;
+              
+            case 2:
+              lcd.setCursor(6, 1);
+              option = 0;
+              break;
+              
+            case 3:
+              lcd.setCursor(14, 1);
+              option = 1;
+              break;
+          }
+          lcd.print(" ");
+        }
+  
+        else if(digitalRead(downBtn) == LOW)
+        {
+          switch(option)
+          {
+            case 0:
+              lcd.setCursor(6, 0);
+              option = 2;
+              break;
+  
+            case 1:
+              lcd.setCursor(15, 0);
+              option = 3;
+              break;
+  
+            case 2:
+              scrolled = true;
+              option = 4;
+              lcd.clear();
+              break;
+  
+            case 3:
+              scrolled = true;
+              option = 5;
+              lcd.clear();
+              break;
+          }
+          lcd.print(" ");
+        }
+
+        if(digitalRead(rBtn) == LOW || digitalRead(lBtn) == LOW)
+        {
+          switch(option)
+          {
+            case 0:
+              lcd.setCursor(6, 0);
+              option = 1;
+              break;
+              
+            case 1:
+              lcd.setCursor(15, 0);
+              option = 0;
+              break;
+              
+            case 2:
+              lcd.setCursor(6, 1);
+              option = 3;
+              break;
+              
+            case 3:
+              lcd.setCursor(14, 1);
+              option = 2;
+              break;
+          }
+          lcd.print(" "); 
+        }
+
+       else if(digitalRead(ctrlBtn) == LOW)
+        {
+          switch(option)
+          {
+            case 0:
+              if(addClock == true)
+              {
+                addClock = false;
+              }
+
+              else
+              {
+                addClock = true;
+              }
+              break;
+              
+            case 1:
+              if(addPhrase == true)
+              {
+                addPhrase = false;
+              }
+  
+              else
+              {
+                addPhrase = true;
+              }
+              break;
+
+            case 2:
+              if(addHmd == true)
+              {
+                addHmd = false;
+              }
+
+              else
+              {
+                addHmd = true;
+              }
+              break;
+
+            case 3:
+              if(addTmp == true)
+              {
+                addTmp == false;
+              }
+              else
+              {
+                addTmp = true;
+              }
+              break;
+          }
+        }
       }
-     }
     }
     
     /* Phrase set page (style)*/
     else if(page == 9)
     {
-      modifiedPhrase = false;
-      modifiedClock = false;
-      modifiedTmp = false;
-      modifiedHmd = false;
       
       if(addPhrase == true)
       {
-        modifiedPhrase = true;
         int longestPhraseLen = longest_phrase_len();
         
         if(defualtStyle == true)
@@ -1565,7 +1499,6 @@ void loop(void)
     /* Clock set page (style) */
     else if(page == 10)
     {
-      modifiedClock = true;
       int colClockFull = colClockStyle + 6;
       lcd.setCursor(colClockStyle, rowClockStyle);
       lcd.print("12:00AM");
@@ -1650,7 +1583,6 @@ void loop(void)
     /* Tmp set page (style) */
     else if(page == 11)
     {
-      modifiedTmp = true;
       int colTmpFull = colTmpStyle + 6;
       lcd.setCursor(colTmpStyle, rowTmpStyle);
       lcd.print("Tmp:0 C");
@@ -1787,7 +1719,6 @@ void loop(void)
     /* Hmd set page (style) */
     else if(page == 12)
     {
-      modifiedHmd = true;
       int colHmdFull = colHmdStyle + 6;
       lcd.setCursor(colHmdStyle, rowHmdStyle);
       lcd.print("Hmd:0 %");
@@ -2990,1804 +2921,43 @@ void smart_locating_threeWid(int oldColFull1, int oldCol1, int oldRow1, int oldC
   }
 }
 
-int longest_with_bytes()
+void store_initial_state()
 {
-  if(5 > userPrefPhrase.length() + 1)
+  if(stored_values == false)
   {
-    return colPhrase + 5;
+    initialTmp = addTmp;
+    initialHmd = addHmd;
+    initialPhrase = addPhrase;
+    initialClock = addClock;
+    stored_values = true;
   }
-
-  return colPhrase + userPrefPhrase.length() + 1;
 }
 
-int longest_cst()
+void style_menu_to_home()
 {
-  if(5 > userPrefPhrase.length() + 1)
-  {
-    return 6;
-  }
-
-  return userPrefPhrase.length() + 2;
+  addTmp = initialTmp;
+  addHmd = initialHmd;
+  addClock = initialClock;
+  addPhrase = initialPhrase;
+  stored_values = false;
+  scrolled = false;
+  option = 0;
+  rowMenuArrow = 0;
+  colMenuArrow = 0;
+  lcd.clear();
+  
+  page = 1;
 }
-bool check_and_locate(String workingWid)
+
+void customize()
 {
-  if(workingWid == "Clock")
-  {
-    if(addHmd == true && addTmp == true && addPhrase == true)
-    {
-      if(rowHmd == rowTmp)
-      {
-        rowClock = rowPhrase;
-
-        if(colPhrase >= 7)
-        {
-          if(colPhrase >= colClock + 6 && modifiedClock == true)
-          {
-            return true;
-          }
-
-          colClock = 0;
-          return true;
-        }
-
-        else if(15 - (longest_with_bytes()) >= 7)
-        {
-          if(15 - (longest_with_bytes()) <= colClock + 6 && modifiedClock == true)
-          {
-            return true;
-          }
-
-          colClock = 9;
-          return true;
-        }
-        return false;
-      }
-
-      else if(rowHmd == rowPhrase)
-      {
-        rowClock = rowTmp;
-        
-        if(colTmp >= 7)
-        { 
-          if(colTmp >= colClock + 6 && modifiedClock == true)
-          {
-            return true;  
-          }
-          
-          colClock = 0;
-          return true;
-        }
-
-        else if(15 - (colTmp + 6) >= 7)
-        {
-          if(15 - (colTmp + 6) <= colClock + 6 && modifiedClock == true)
-          {
-            return true;
-          }
-          
-          colClock = 9;
-          return true;
-        }
-        return false;  
-        
-      }
-
-      else if(rowTmp == rowPhrase)
-      {
-        rowClock = rowHmd;
-
-        if(colHmd >= 7)
-        {
-          if(colHmd >= colClock + 6 && modifiedClock == true)
-          {
-            return true;
-          }
-
-          colClock = 0;
-          return true;
-        }
-
-        else if(15 - (colHmd + 6) >= 7)
-        {
-          if(15 - (colTmp + 6) <= colClock + 6 && modifiedClock == true)
-          {
-            return true;
-          }
-
-          colClock = 9;
-          return true;
-        }
-        return false;
-      }
-    }
-  
-    else if(addHmd == true && addPhrase == true)
-    {
-      if(rowHmd == rowPhrase)
-      {
-        if(modifiedClock == true && rowClock != rowHmd)
-        {
-          return true;          
-        }
-
-        if(rowHmd == 1)
-        {
-          rowClock = 0;
-          return true;
-        }
-
-        rowClock = 1;
-        return true;
-      }
-
-      else
-      {
-        if(modifiedClock == true)
-        {
-          if(rowClock == rowHmd)
-          {
-            if((colHmd >= colClock + 6) || (15 - (colHmd + 6) <= colClock + 6))
-            {
-              return true;
-            }
-          }
-
-          else
-          {
-            if((colPhrase >= colClock + 6) || (15 - (longest_with_bytes()) <= colClock + 6))
-            {
-              return true;
-            }
-          }
-        }
-        
-        if(colPhrase >= 7)
-        {
-          colClock = 0;
-          rowClock = rowPhrase;
-          return true;
-        }
-
-        else if(colHmd >= 7)
-        {
-          colClock = 0;
-          rowClock = rowHmd;
-          return true;
-        }
-
-        else if(15 - (colHmd + 6) >= 7)
-        {
-          colClock = 9;
-          rowClock = rowHmd;
-          return true;
-        }
-
-        else if(15 - (longest_with_bytes()) >= 7)
-        {
-          colClock = 9;
-          rowClock = rowPhrase;
-          return true;
-        }
-        
-        return false;
-      }
-    }
-  
-    else if(addHmd == true && addTmp == true)
-    {
-      if(rowHmd == rowTmp)
-      {
-        if(modifiedClock == true && rowClock != rowTmp)
-        {
-          return true;
-        }
-
-        if(rowHmd == 1)
-        {
-          rowClock = 0;
-          return true;
-        }
-
-        rowClock = 1;
-        return true;
-      }
-
-      else
-      {
-        if(modifiedClock == true)
-        {
-          if(rowClock == rowHmd)
-          {
-            if((colHmd >= colClock + 6) || (15 - (colHmd + 6) <= colClock + 6))
-            {
-              return true;
-            }
-          }
-
-          else
-          {
-            if((colTmp >= colClock + 6) || (15 - (colTmp + 6) <= colClock + 6))
-            {
-              return true;
-            }
-          }
-        }
-
-        if(colTmp >= 7)
-        {
-          colClock = 0;
-          rowClock = rowTmp;
-          return true;
-        }
-
-        else if(colHmd >= 7)
-        {
-          colClock = 0;
-          rowClock = rowHmd;
-          return true;
-        }
-
-        else if(15 - (colHmd + 6) >= 7)
-        {
-          colClock = 9;
-          rowClock = rowHmd;
-          return true;
-        }
-
-        else if(15 - (colTmp + 6) >= 7)
-        {
-          colClock = 9;
-          rowClock = rowTmp;
-          return true;
-        }
-        
-        return false;
-      }
-    }
-  
-    else if(addTmp == true && addPhrase == true)
-    {
-      if(rowTmp == rowPhrase)
-      {
-        if(modifiedClock == true && rowClock != rowTmp)
-        {
-          return true;
-        }
-
-        if(rowTmp == 1)
-        {
-          rowClock = 0;
-          return true;
-        }
-
-        rowClock = 1;
-        return true;
-      }
-
-      else
-      {
-        if(modifiedClock == true)
-        {
-          if(rowClock == rowTmp)
-          {
-            if((colTmp >= colClock + 6) || (15 - (colTmp + 6) <= colClock + 6))
-            {
-              return true;
-            }
-          }
-
-          else
-          {
-            if((colPhrase >= colClock + 6) || (15 - (longest_with_bytes()) <= colClock + 6))
-            {
-              return true;
-            }
-          }
-        }
-
-        if(colPhrase >= 7)
-        {
-          colClock = 0;
-          rowClock = rowPhrase;
-          return true;
-        }
-
-        else if(colTmp >= 7)
-        {
-          colClock = 0;
-          rowClock = rowTmp;
-          return true;
-        }
-
-        else if(15 - (colTmp + 6) >= 7)
-        {
-          colClock = 9;
-          rowClock = rowTmp;
-          return true;
-        }
-
-        else if(15 - (longest_with_bytes()) >= 7)
-        {
-          colClock = 9;
-          rowClock = rowPhrase;
-          return true;
-        }
-        
-        return false;
-      }
-    }
-  
-    else if(addTmp == true)
-    {
-      if(modifiedClock == true)
-      {
-        if(rowClock == rowTmp)
-        {
-          if((colTmp >= colClock + 6) || (15 - (colTmp + 6) <= colClock + 6))
-          {
-            return true;
-          }
-
-          else
-          {
-            if(rowTmp == 1)
-            {
-              rowClock = 0;
-              return true;
-            }
-
-            rowClock = 1;
-            return true;
-          }
-        }
-        return true;
-      }
-
-      else
-      {
-        colClock = 0;
-        if(rowTmp == 1)
-        {
-          rowClock = 0;
-        }
-
-        else
-        {
-          rowClock = 1;
-        }
-        return true;
-      }
-    }
-  
-    else if(addPhrase == true)
-    {
-      if(modifiedClock == true)
-      {
-        if(rowClock == rowPhrase)
-        {
-          if((colPhrase >= colClock + 6) || (15 - (longest_with_bytes()) <= colClock + 6))
-          {
-            return true;
-          }
-
-          else
-          {
-            if(rowPhrase == 1)
-            {
-              rowClock = 0;
-              return true;
-            }
-
-            rowClock = 1;
-            return true;
-          }
-        }
-        return true;
-      }
-      
-      else
-      {
-        colClock = 0;
-        if(rowPhrase == 1)
-        {
-          rowClock = 0;
-        }
-
-        else
-        {
-          rowClock = 1;
-        }
-        return true;
-      }
-    }
-  
-    else if(addHmd == true)
-    {
-      if(modifiedClock == true)
-      {
-        if(rowClock == rowHmd)
-        {
-          if((colHmd >= colClock + 6) || (15 - (colHmd + 6) <= colClock + 6))
-          {
-            return true;
-          }
-
-          else
-          {
-            if(rowHmd == 1)
-            {
-              rowClock = 0;
-              return true;
-            }
-
-            rowClock = 1;
-            return true;
-          }
-        }
-        return true;
-      }
-
-      else
-      {
-        colClock = 0;
-        if(rowHmd == 1)
-        {
-          rowClock = 0;
-        }
-
-        else
-        {
-          rowClock = 1;
-        }
-        return true;
-      }
-    }
-
-    else
-    {
-      if(modifiedClock == true)
-      {
-        return true;
-      }
-
-      colClock = 0;
-      rowClock = 0;
-      return true;
-    }
-  }
-
-  else if(workingWid == "Hmd")
-  {
-    if(addPhrase == true && addTmp == true && addClock == true)
-    {
-      if(rowClock == rowTmp)
-      {
-        rowHmd= rowPhrase;
-
-        if(colPhrase >= 7)
-        {
-          if(colPhrase >= colHmd + 6 && modifiedHmd == true)
-          {
-            return true;
-          }
-
-          colHmd = 0;
-          return true;
-        }
-
-        else if(15 - (longest_with_bytes()) >= 7)
-        {
-          if(15 - (longest_with_bytes()) <= colHmd + 6 && modifiedHmd == true)
-          {
-            return true;
-          }
-
-          colHmd = 9;
-          return true;
-        }
-        return false;
-      }
-
-      else if(rowClock == rowPhrase)
-      {
-        rowHmd = rowTmp;
-        
-        if(colTmp >= 7)
-        { 
-          if(colTmp >= colHmd + 6 && modifiedHmd == true)
-          {
-            return true;  
-          }
-          
-          colHmd = 0;
-          return true;
-        }
-
-        else if(15 - (colTmp + 6) >= 7)
-        {
-          if(15 - (colTmp + 6) <= colHmd + 6 && modifiedHmd == true)
-          {
-            return true;
-          }
-          
-          colHmd = 9;
-          return true;
-        }
-        return false;  
-        
-      }
-
-      else if(rowTmp == rowPhrase)
-      {
-        rowHmd = rowClock;
-
-        if(colClock >= 7)
-        {
-          if(colClock >= colHmd + 6 && modifiedHmd == true)
-          {
-            return true;
-          }
-
-          colHmd = 0;
-          return true;
-        }
-
-        else if(15 - (colClock + 6) >= 7)
-        {
-          if(15 - (colTmp + 6) <= colHmd + 6 && modifiedHmd == true)
-          {
-            return true;
-          }
-
-          colHmd = 9;
-          return true;
-        }
-        return false;
-      }
-    }
-
-    else if(addTmp == true && addClock == true)
-    {
-      if(rowClock == rowTmp)
-      {
-        if(modifiedHmd == true && rowHmd != rowClock)
-        {
-          return true;
-        }
-
-        if(rowClock == 1)
-        {
-          rowHmd = 0;
-          return true;
-        }
-
-        rowHmd = 1;
-        return true;
-      }
-
-      else
-      {
-        if(modifiedHmd == true)
-        {
-          if(rowHmd == rowClock)
-          {
-            if((colClock >= colHmd + 6) || (15 - (colClock + 6) <= colHmd + 6))
-            {
-              return true;
-            }
-          }
-
-          else
-          {
-            if((colTmp >= colHmd + 6) || (15 - (colTmp + 6) <= colHmd + 6))
-            {
-              return true;
-            }
-          }
-        }
-
-        if(colTmp >= 7)
-        {
-          colHmd = 0;
-          rowHmd = rowTmp;
-          return true;
-        }
-
-        else if(colClock >= 7)
-        {
-          colHmd = 0;
-          rowHmd = rowClock;
-          return true;
-        }
-
-        else if(15 - (colClock + 6) >= 7)
-        {
-          colHmd = 9;
-          rowHmd = rowClock;
-          return true;
-        }
-
-        else if(15 - (colTmp + 6) >= 7)
-        {
-          colHmd = 9;
-          rowHmd = rowTmp;
-          return true;
-        }
-        
-        return false;
-      }
-    }
-
-    else if(addTmp == true && addPhrase == true)
-    {
-      if(rowTmp == rowPhrase)
-      {
-        if(modifiedHmd == true && rowHmd != rowTmp)
-        {
-          return true;
-        }
-
-        if(rowTmp == 1)
-        {
-          rowHmd = 0;
-          return true;
-        }
-
-        rowHmd = 1;
-        return true;
-      }
-
-      else
-      {
-        if(modifiedHmd == true)
-        {
-          if(rowHmd == rowTmp)
-          {
-            if((colTmp >= colHmd + 6) || (15 - (colTmp + 6) <= colHmd + 6))
-            {
-              return true;
-            }
-          }
-
-          else
-          {
-            if((colPhrase >= colHmd + 6) || (15 - (longest_with_bytes()) <= colHmd + 6))
-            {
-              return true;
-            }
-          }
-        }
-
-        if(colPhrase >= 7)
-        {
-          colHmd = 0;
-          rowHmd = rowPhrase;
-          return true;
-        }
-
-        else if(colTmp >= 7)
-        {
-          colHmd = 0;
-          rowHmd = rowTmp;
-          return true;
-        }
-
-        else if(15 - (colTmp + 6) >= 7)
-        {
-          colHmd = 9;
-          rowHmd = rowTmp;
-          return true;
-        }
-
-        else if(15 - (longest_with_bytes()) >= 7)
-        {
-          colHmd = 9;
-          rowHmd = rowPhrase;
-          return true;
-        }
-        
-        return false;
-      }
-    }
-
-    else if(addPhrase == true && addClock == true)
-    {
-      if(rowClock == rowPhrase)
-      {
-        if(modifiedHmd == true && rowHmd != rowClock)
-        {
-          return true;
-        }
-
-        if(rowClock == 1)
-        {
-          rowHmd = 0;
-          return true;
-        }
-
-        rowHmd = 1;
-        return true;
-      }
-
-      else
-      {
-        if(modifiedHmd == true)
-        {
-          if(rowHmd == rowClock)
-          {
-            if((colClock >= colHmd + 6) || (15 - (colClock + 6) <= colHmd + 6))
-            {
-              return true;
-            }
-          }
-
-          else
-          {
-            if((colPhrase >= colHmd + 6) || (15 - (longest_with_bytes()) <= colHmd + 6))
-            {
-              return true;
-            }
-          }
-        }
-
-        if(colPhrase >= 7)
-        {
-          colHmd = 0;
-          rowHmd = rowPhrase;
-          return true;
-        }
-
-        else if(colClock >= 7)
-        {
-          colHmd = 0;
-          rowHmd = rowClock;
-          return true;
-        }
-
-        else if(15 - (colClock + 6) >= 7)
-        {
-          colHmd = 9;
-          rowHmd = rowClock;
-          return true;
-        }
-
-        else if(15 - (longest_with_bytes()) >= 7)
-        {
-          colHmd = 9;
-          rowHmd = rowPhrase;
-          return true;
-        }
-        
-        return false;
-      }
-    }
-
-    else if(addPhrase == true)
-    {
-      if(modifiedHmd == true)
-      {
-        if(rowHmd == rowPhrase)
-        {
-          if((colPhrase >= colHmd + 6) || (15 - (longest_with_bytes()) <= colHmd + 6))
-          {
-            return true;
-          }
-
-          else
-          {
-            if(rowPhrase == 1)
-            {
-              rowHmd = 0;
-              return true;
-            }
-
-            rowHmd = 1;
-            return true;
-          }
-        }
-        return true;
-      }
-      
-      else
-      {
-        colHmd = 0;
-        if(rowPhrase == 1)
-        {
-          rowHmd = 0;
-        }
-
-        else
-        {
-          rowHmd = 1;
-        }
-        return true;
-      }
-    }
-
-    else if(addClock == true)
-    {
-      if(modifiedHmd == true)
-      {
-        if(rowHmd == rowClock)
-        {
-          if((colClock >= colHmd + 6) || (15 - (colClock + 6) <= colHmd + 6))
-          {
-            return true;
-          }
-
-          else
-          {
-            if(rowClock == 1)
-            {
-              rowHmd = 0;
-              return true;
-            }
-
-            rowHmd = 1;
-            return true;
-          }
-        }
-        return true;
-      }
-
-      else
-      {
-        colHmd = 0;
-        if(rowClock == 1)
-        {
-          rowHmd = 0;
-        }
-
-        else
-        {
-          rowHmd = 1;
-        }
-        return true;
-      }
-    }
-
-    else if(addTmp == true)
-    {
-      if(modifiedHmd == true)
-      {
-        if(rowHmd == rowTmp)
-        {
-          if((colTmp >= colHmd + 6) || (15 - (colTmp + 6) <= colHmd + 6))
-          {
-            return true;
-          }
-
-          else
-          {
-            if(rowTmp == 1)
-            {
-              rowHmd = 0;
-              return true;
-            }
-
-            rowHmd = 1;
-            return true;
-          }
-        }
-        return true;
-      }
-
-      else
-      {
-        colHmd = 0;
-        if(rowTmp == 1)
-        {
-          rowHmd = 0;
-        }
-
-        else
-        {
-          rowHmd = 1;
-        }
-        return true;
-      }
-    }
-
-    else
-    {
-      if(modifiedHmd == true)
-      {
-        return true;
-      }
-
-      colHmd = 0;
-      rowHmd = 0;
-      return true;
-    }
-  }
-
-  else if(workingWid == "Tmp")
-  {
-    if(addHmd == true && addClock == true && addPhrase == true)
-    {
-      if(rowHmd == rowClock)
-      {
-        rowTmp = rowPhrase;
-
-        if(colPhrase >= 7)
-        {
-          if(colPhrase >= colTmp + 6 && modifiedTmp == true)
-          {
-            return true;
-          }
-
-          colTmp = 0;
-          return true;
-        }
-
-        else if(15 - (longest_with_bytes()) >= 7)
-        {
-          if(15 - (longest_with_bytes()) <= colTmp + 6 && modifiedTmp == true)
-          {
-            return true;
-          }
-
-          colTmp = 9;
-          return true;
-        }
-        return false;
-      }
-
-      else if(rowHmd == rowPhrase)
-      {
-        rowTmp = rowClock;
-        
-        if(colClock >= 7)
-        { 
-          if(colClock >= colTmp + 6 && modifiedTmp == true)
-          {
-            return true;  
-          }
-          
-          colTmp = 0;
-          return true;
-        }
-
-        else if(15 - (colClock + 6) >= 7)
-        {
-          if(15 - (colClock + 6) <= colTmp + 6 && modifiedTmp == true)
-          {
-            return true;
-          }
-          
-          colTmp = 9;
-          return true;
-        }
-        return false;  
-        
-      }
-
-      else if(rowClock == rowPhrase)
-      {
-        rowTmp = rowHmd;
-
-        if(colHmd >= 7)
-        {
-          if(colHmd >= colTmp + 6 && modifiedTmp == true)
-          {
-            return true;
-          }
-
-          colTmp = 0;
-          return true;
-        }
-
-        else if(15 - (colTmp + 6) >= 7)
-        {
-          if(15 - (colClock + 6) <= colTmp + 6 && modifiedTmp == true)
-          {
-            return true;
-          }
-
-          colTmp = 9;
-          return true;
-        }
-        return false;
-      }
-    }
-
-    else if(addHmd == true && addClock == true)
-    {
-      if(rowClock == rowHmd)
-      {
-        if(modifiedHmd == true && rowTmp != rowClock)
-        {
-          return true;
-        }
-
-        if(rowClock == 1)
-        {
-          rowTmp = 0;
-          return true;
-        }
-
-        rowTmp = 1;
-        return true;
-      }
-
-      else
-      {
-        if(modifiedTmp == true)
-        {
-          if(rowTmp == rowClock)
-          {
-            if((colClock >= colTmp + 6) || (15 - (colClock + 6) <= colTmp + 6))
-            {
-              return true;
-            }
-          }
-
-          else
-          {
-            if((colHmd >= colTmp + 6) || (15 - (colHmd + 6) <= colTmp + 6))
-            {
-              return true;
-            }
-          }
-        }
-
-        if(colHmd >= 7)
-        {
-          colTmp = 0;
-          rowTmp = rowHmd;
-          return true;
-        }
-
-        else if(colClock >= 7)
-        {
-          colTmp = 0;
-          rowTmp = rowClock;
-          return true;
-        }
-
-        else if(15 - (colClock + 6) >= 7)
-        {
-          colTmp = 9;
-          rowTmp = rowClock;
-          return true;
-        }
-
-        else if(15 - (colHmd + 6) >= 7)
-        {
-          colTmp = 9;
-          rowTmp = rowHmd;
-          return true;
-        }
-        
-        return false;
-      }
-    }
-
-    else if(addHmd == true && addPhrase == true)
-    {
-      if(rowHmd == rowPhrase)
-      {
-        if(modifiedTmp == true && rowTmp != rowHmd)
-        {
-          return true;          
-        }
-
-        if(rowHmd == 1)
-        {
-          rowTmp = 0;
-          return true;
-        }
-
-        rowTmp = 1;
-        return true;
-      }
-
-      else
-      {
-        if(modifiedTmp == true)
-        {
-          if(rowTmp == rowHmd)
-          {
-            if((colHmd >= colTmp + 6) || (15 - (colHmd + 6) <= colTmp + 6))
-            {
-              return true;
-            }
-          }
-
-          else
-          {
-            if((colPhrase >= colTmp + 6) || (15 - (longest_with_bytes()) <= colTmp + 6))
-            {
-              return true;
-            }
-          }
-        }
-        
-        if(colPhrase >= 7)
-        {
-          colTmp = 0;
-          rowTmp = rowPhrase;
-          return true;
-        }
-
-        else if(colHmd >= 7)
-        {
-          colTmp = 0;
-          rowTmp = rowHmd;
-          return true;
-        }
-
-        else if(15 - (colHmd + 6) >= 7)
-        {
-          colTmp = 9;
-          rowTmp = rowHmd;
-          return true;
-        }
-
-        else if(15 - (longest_with_bytes()) >= 7)
-        {
-          colTmp = 9;
-          rowTmp = rowPhrase;
-          return true;
-        }
-        
-        return false;
-      }
-    }
-
-    else if(addPhrase == true && addClock == true)
-    {
-      if(rowClock == rowPhrase)
-      {
-        if(modifiedTmp == true && rowTmp != rowClock)
-        {
-          return true;          
-        }
-
-        if(rowClock == 1)
-        {
-          rowTmp = 0;
-          return true;
-        }
-
-        rowTmp = 1;
-        return true;
-      }
-
-      else
-      {
-        if(modifiedTmp == true)
-        {
-          if(rowTmp == rowClock)
-          {
-            if((colClock >= colTmp + 6) || (15 - (colClock + 6) <= colTmp + 6))
-            {
-              return true;
-            }
-          }
-
-          else
-          {
-            if((colPhrase >= colTmp + 6) || (15 - (longest_with_bytes()) <= colTmp + 6))
-            {
-              return true;
-            }
-          }
-        }
-        
-        if(colPhrase >= 7)
-        {
-          colTmp = 0;
-          rowTmp = rowPhrase;
-          return true;
-        }
-
-        else if(colClock >= 7)
-        {
-          colTmp = 0;
-          rowTmp = rowClock;
-          return true;
-        }
-
-        else if(15 - (colClock + 6) >= 7)
-        {
-          colTmp = 9;
-          rowTmp = rowClock;
-          return true;
-        }
-
-        else if(15 - (longest_with_bytes()) >= 7)
-        {
-          colTmp = 9;
-          rowTmp = rowPhrase;
-          return true;
-        }
-        
-        return false;
-      }
-    }
-
-    else if(addPhrase == true)
-    {
-      if(modifiedTmp == true)
-      {
-        if(rowTmp == rowPhrase)
-        {
-          if((colPhrase >= colTmp + 6) || (15 - (longest_with_bytes()) <= colTmp + 6))
-          {
-            return true;
-          }
-
-          else
-          {
-            if(rowPhrase == 1)
-            {
-              rowTmp = 0;
-              return true;
-            }
-
-            rowTmp = 1;
-            return true;
-          }
-        }
-        return true;
-      }
-      
-      else
-      {
-        colTmp = 0;
-        if(rowPhrase == 1)
-        {
-          rowTmp = 0;
-        }
-
-        else
-        {
-          rowTmp = 1;
-        }
-        return true;
-      }
-    }
-
-    else if(addClock == true)
-    {
-      if(modifiedTmp == true)
-      {
-        if(rowTmp == rowClock)
-        {
-          if((colClock >= colTmp + 6) || (15 - (colClock + 6) <= colTmp + 6))
-          {
-            return true;
-          }
-
-          else
-          {
-            if(rowClock == 1)
-            {
-              rowTmp = 0;
-              return true;
-            }
-
-            rowTmp = 1;
-            return true;
-          }
-        }
-        return true;
-      }
-
-      else
-      {
-        colTmp = 0;
-        if(rowClock == 1)
-        {
-          rowTmp = 0;
-        }
-
-        else
-        {
-          rowTmp = 1;
-        }
-        return true;
-      }
-    }
-
-    else if(addHmd == true)
-    {
-      if(modifiedTmp == true)
-      {
-        if(rowTmp == rowHmd)
-        {
-          if((colHmd >= colTmp + 6) || (15 - (colHmd + 6) <= colTmp + 6))
-          {
-            return true;
-          }
-
-          else
-          {
-            if(rowHmd == 1)
-            {
-              rowTmp = 0;
-              return true;
-            }
-
-            rowTmp = 1;
-            return true;
-          }
-        }
-        return true;
-      }
-
-      else
-      {
-        colTmp = 0;
-        if(rowHmd == 1)
-        {
-          rowTmp = 0;
-        }
-
-        else
-        {
-          rowTmp = 1;
-        }
-        return true;
-      }
-    }
-
-    else
-    {
-      if(modifiedTmp == true)
-      {
-        return true;
-      }
-
-      colTmp = 0;
-      rowTmp = 0;
-      return true;
-    }
-  }
-
-  else if(workingWid == "Phrase")
-  {
-    if(addTmp == true && addHmd == true && addPhrase == true)
-    {
-      if(rowHmd == rowTmp)
-      {
-        rowPhrase = rowClock;
-
-        if(colClock >= longest_cst())
-        {
-          if(colClock >= longest_with_bytes() && modifiedPhrase == true)
-          {
-            return true;
-          }
-
-          colPhrase = 0;
-          return true;
-        }
-
-        else if(15 - (colClock + 6) >= longest_cst())
-        {
-          if(15 - (colClock + 6) <= longest_with_bytes() && modifiedPhrase == true)
-          {
-            return true;
-          }
-
-          colPhrase = 14 - longest_cst();
-          return true;
-        }
-        return false;
-      }
-
-      else if(rowHmd == rowClock)
-      {
-        rowPhrase = rowTmp;
-        
-        if(colTmp >= longest_cst())
-        { 
-          if(colTmp >= longest_with_bytes() && modifiedPhrase == true)
-          {
-            return true;  
-          }
-          
-          colPhrase = 0;
-          return true;
-        }
-
-        else if(15 - (colTmp + 6) >= longest_cst())
-        {
-          if(15 - (colTmp + 6) <= longest_with_bytes() && modifiedPhrase == true)
-          {
-            return true;
-          }
-          
-          colPhrase = 14 - longest_cst();
-          return true;
-        }
-        return false;  
-        
-      }
-
-      else if(rowTmp == rowClock)
-      {
-        rowPhrase = rowHmd;
-
-        if(colHmd >= longest_cst())
-        {
-          if(colHmd >= longest_with_bytes() && modifiedPhrase == true)
-          {
-            return true;
-          }
-
-          colPhrase = 0;
-          return true;
-        }
-
-        else if(15 - (colHmd + 6) >= longest_cst())
-        {
-          if(15 - (colTmp + 6) <= longest_with_bytes() && modifiedPhrase == true)
-          {
-            return true;
-          }
-
-          colClock = 14 - longest_cst();
-          return true;
-        }
-        return false;
-      }
-    }
-
-    else if(addTmp == true && addClock == true)
-    {
-      if(rowClock == rowTmp)
-      {
-        if(modifiedPhrase == true && rowPhrase != rowTmp)
-        {
-          return true;
-        }
-
-        if(rowClock == 1)
-        {
-          rowPhrase = 0;
-          return true;
-        }
-
-        rowPhrase = 1;
-        return true;
-      }
-
-      else
-      {
-        if(modifiedPhrase == true)
-        {
-          if(rowPhrase == rowClock)
-          {
-            if((colClock >= longest_with_bytes()) || (15 - (colClock + 6) <= longest_with_bytes()))
-            {
-              return true;
-            }
-          }
-
-          else
-          {
-            if((colTmp >= longest_with_bytes()) || (15 - (colTmp + 6) <= longest_with_bytes()))
-            {
-              return true;
-            }
-          }
-        }
-
-        if(colTmp >= longest_cst())
-        {
-          colPhrase = 0;
-          rowPhrase = rowTmp;
-          return true;
-        }
-
-        else if(colClock >= longest_cst())
-        {
-          colPhrase = 0;
-          rowPhrase = rowClock;
-          return true;
-        }
-
-        else if(15 - (colClock + 6) >= longest_cst())
-        {
-          colPhrase = 14 - longest_cst();
-          rowPhrase = rowClock;
-          return true;
-        }
-
-        else if(15 - (colTmp + 6) >= longest_cst())
-        {
-          colPhrase = 14 - longest_cst();
-          rowPhrase = rowTmp;
-          return true;
-        }
-        
-        return false;
-      }
-    }
-
-    else if(addTmp == true && addHmd == true)
-    {
-      if(rowHmd == rowTmp)
-      {
-        if(modifiedPhrase == true && rowPhrase != rowTmp)
-        {
-          return true;
-        }
-
-        if(rowHmd == 1)
-        {
-          rowPhrase = 0;
-          return true;
-        }
-
-        rowPhrase = 1;
-        return true;
-      }
-
-      else
-      {
-        if(modifiedPhrase == true)
-        {
-          if(rowPhrase == rowHmd)
-          {
-            if((colHmd >= longest_with_bytes()) || (15 - (colHmd + 6) <= longest_with_bytes()))
-            {
-              return true;
-            }
-          }
-
-          else
-          {
-            if((colTmp >= longest_with_bytes()) || (15 - (colTmp + 6) <= longest_with_bytes()))
-            {
-              return true;
-            }
-          }
-        }
-
-        if(colTmp >= longest_cst())
-        {
-          colPhrase = 0;
-          rowPhrase = rowTmp;
-          return true;
-        }
-
-        else if(colHmd >= longest_cst())
-        {
-          colPhrase = 0;
-          rowPhrase = rowHmd;
-          return true;
-        }
-
-        else if(15 - (colHmd + 6) >= longest_cst())
-        {
-          colPhrase = 14 - longest_cst();
-          rowPhrase = rowHmd;
-          return true;
-        }
-
-        else if(15 - (colTmp + 6) >= longest_cst())
-        {
-          colPhrase = 14 - longest_cst();
-          rowPhrase = rowTmp;
-          return true;
-        }
-        
-        return false;
-      }
-    }
-
-    else if(addClock == true && addHmd == true)
-    {
-      if(rowHmd == rowClock)
-      {
-        if(modifiedPhrase == true && rowPhrase != rowClock)
-        {
-          return true;
-        }
-
-        if(rowHmd == 1)
-        {
-          rowPhrase = 0;
-          return true;
-        }
-
-        rowPhrase = 1;
-        return true;
-      }
-
-      else
-      {
-        if(modifiedPhrase == true)
-        {
-          if(rowPhrase == rowHmd)
-          {
-            if((colHmd >= longest_with_bytes()) || (15 - (colHmd + 6) <= longest_with_bytes()))
-            {
-              return true;
-            }
-          }
-
-          else
-          {
-            if((colClock >= longest_with_bytes()) || (15 - (colClock + 6) <= longest_with_bytes()))
-            {
-              return true;
-            }
-          }
-        }
-
-        if(colClock >= longest_cst())
-        {
-          colPhrase = 0;
-          rowPhrase = rowClock;
-          return true;
-        }
-
-        else if(colHmd >= longest_cst())
-        {
-          colPhrase = 0;
-          rowPhrase = rowHmd;
-          return true;
-        }
-
-        else if(15 - (colHmd + 6) >= longest_cst())
-        {
-          colPhrase = 14 - longest_cst();
-          rowPhrase = rowHmd;
-          return true;
-        }
-
-        else if(15 - (colClock + 6) >= longest_cst())
-        {
-          colPhrase = 14 - longest_cst();
-          rowPhrase = rowClock;
-          return true;
-        }
-        
-        return false;
-      }
-    }
-    
-    else if(addClock == true)
-    {
-      if(modifiedPhrase == true)
-      {
-        if(rowPhrase == rowClock)
-        {
-          if((colClock >= longest_with_bytes()) || (15 - (colClock + 6) <= longest_with_bytes()))
-          {
-            return true;
-          }
-
-          else
-          {
-            if(rowClock == 1)
-            {
-              rowPhrase = 0;
-              return true;
-            }
-
-            rowPhrase = 1;
-            return true;
-          }
-        }
-        return true;
-      }
-
-      else
-      {
-        colPhrase = 0;
-        if(rowClock == 1)
-        {
-          rowPhrase = 0;
-        }
-
-        else
-        {
-          rowPhrase = 1;
-        }
-        return true;
-      }
-    }
-
-    else if(addHmd == true)
-    {
-      if(modifiedPhrase == true)
-      {
-        if(rowPhrase == rowHmd)
-        {
-          if((colHmd >= longest_with_bytes()) || (15 - (colHmd + 6) <= longest_with_bytes()))
-          {
-            return true;
-          }
-
-          else
-          {
-            if(rowHmd == 1)
-            {
-              rowPhrase = 0;
-              return true;
-            }
-
-            rowPhrase = 1;
-            return true;
-          }
-        }
-        return true;
-      }
-
-      else
-      {
-        colPhrase = 0;
-        if(rowHmd == 1)
-        {
-          rowPhrase = 0;
-        }
-
-        else
-        {
-          rowPhrase = 1;
-        }
-        return true;
-      }
-    }
-
-    else if(addTmp == true)
-    {
-      if(modifiedPhrase == true)
-      {
-        if(rowPhrase == rowTmp)
-        {
-          if((colTmp >= longest_with_bytes()) || (15 - (colTmp + 6) <= longest_with_bytes()))
-          {
-            return true;
-          }
-
-          else
-          {
-            if(rowTmp == 1)
-            {
-              rowPhrase = 0;
-              return true;
-            }
-
-            rowPhrase = 1;
-            return true;
-          }
-        }
-        return true;
-      }
-
-      else
-      {
-        colPhrase = 0;
-        if(rowTmp == 1)
-        {
-          rowPhrase = 0;
-        }
-
-        else
-        {
-          rowPhrase = 1;
-        }
-        return true;
-      }
-    }
-    
-    else 
-    {
-      if(modifiedPhrase == true)
-      {
-        return true;
-      }
-
-      colPhrase = 0;
-      rowPhrase = 0;
-      return true;
-    }
-  }
+  initialTmp = addTmp;
+  initialHmd = addHmd;
+  initialPhrase = addPhrase;
+  initialClock = addClock;
+  scrolled = false;
+  option = 0;
+  stored_values = false;
+  lcd.clear();
+  page = 9;
 }
