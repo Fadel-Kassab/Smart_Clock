@@ -1,6 +1,6 @@
-// Grapotronics
+// Grapetronics
 // By Fadel Kassab
-// 08/08/2021
+// 05/08/2022
 #include <LiquidCrystal_I2C.h>
 #include <dht11.h>
 LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);
@@ -11,6 +11,14 @@ const short rBtn = 3;
 const short ctrlBtn = 4;
 const short upBtn = 5;
 const short downBtn = 6;
+const short transistor = 9;
+unsigned long previousLock = 0;
+bool lock = false;
+const short buzzer = 11;
+unsigned long buzz_delay = 300;
+unsigned long buzz_millis = 0;
+short int buzz_counter = -1;
+bool started = true;
 unsigned long previousBtn = 0;
 unsigned long eventBtn = 200;
 unsigned long previousClock = 0;
@@ -196,6 +204,8 @@ void setup(void)
   pinMode(upBtn, INPUT_PULLUP);
   pinMode(downBtn, INPUT_PULLUP);
   pinMode(DHT11PIN, INPUT);
+  pinMode(transistor, OUTPUT);
+  pinMode(buzzer, OUTPUT);
   lcd.createChar(0, heart);
   lcd.createChar(1, music);
   lcd.createChar(2, iceBall);
@@ -208,6 +218,8 @@ void setup(void)
 void loop(void)
 {
   unsigned long current = millis();
+  initialize_buzzer();
+  power_saving_system();
   choose_phrase();
   if(current - previousClock == eventClock)
   {
@@ -440,6 +452,10 @@ void loop(void)
             target_m1 = alarm_m1;
             target_m2  = alarm_m2;
             target_ap = alarm_ap;
+            if(format == 1)
+            {
+              convert_alarm(1); 
+            }
           }
           break;
   
@@ -1970,10 +1986,9 @@ void day_night_24h(void)
 void convert_format(void)
 {
   am_pm_gate = true; // gates should be up to not allow errors happen on hour 12
-  
   if(alarm_on == true)
   {
-    convert_alarm();
+    convert_alarm(0);  
   }
   
   if(format == 0)
@@ -2547,9 +2562,86 @@ void alarm_started(void)
     page = 1;
   }
 }
-void convert_alarm(void)
-{  
-  if(format == 0)
+void convert_alarm(bool mode)
+{ 
+  if(mode == 0)
+  {
+    if(format == 0)
+    {
+      if(target_ap == 0)
+      {
+        if(target_h2 == 1 && target_h1 == 2)
+        {
+          target_h2 = 0;
+          target_h1 = 0;
+        }
+      }
+    
+      else if(target_ap == 1)
+      {
+        if(target_h2 == 0)
+        {
+          if(target_h1 < 8)
+          {
+            target_h1 = target_h1 + 2;
+            target_h2 = 1;
+          }
+    
+          else if(target_h1 <= 9)
+          {
+            target_h1 = target_h1 - 8;
+            target_h2 = 2;
+          }
+        }
+     
+        else if(target_h2 == 1)
+        {
+          if(target_h1 < 2)
+          {
+            target_h1 = target_h1 + 2;
+            target_h2 = 2;
+          }
+        }
+      }
+    }
+  
+    else if(format == 1)
+    { 
+      if(target_ap == 0)
+      {
+        if(target_h2 == 0 && target_h1 == 0)
+        {
+          target_h2 = 1;
+          target_h1 = 2;
+        }
+      }
+    
+      else if(target_ap == 1)
+      {
+        if(target_h2 == 1 && target_h1 != 2)
+        {
+          target_h1 = target_h1 - 2;
+          target_h2 = 0;
+        }
+    
+        else if(target_h2 == 2)
+        {
+          if(target_h1 < 2)
+          {
+            target_h1 = target_h1 + 8;
+            target_h2 = 0;  
+          }
+    
+          else if(target_h1 <= 3)
+          {
+            target_h1 = target_h1 - 2;
+            target_h2 = 1;
+          }
+        }
+      }
+    } 
+  }
+  else
   {
     if(target_ap == 0)
     {
@@ -2587,42 +2679,6 @@ void convert_alarm(void)
       }
     }
   }
-
-  else if(format == 1)
-  { 
-    if(target_ap == 0)
-    {
-      if(target_h2 == 0 && target_h1 == 0)
-      {
-        target_h2 = 1;
-        target_h1 = 2;
-      }
-    }
-  
-    else if(target_ap == 1)
-    {
-      if(target_h2 == 1 && target_h1 != 2)
-      {
-        target_h1 = target_h1 - 2;
-        target_h2 = 0;
-      }
-  
-      else if(target_h2 == 2)
-      {
-        if(target_h1 < 2)
-        {
-          target_h1 = target_h1 + 8;
-          target_h2 = 0;  
-        }
-  
-        else if(target_h1 <= 3)
-        {
-          target_h1 = target_h1 - 2;
-          target_h2 = 1;
-        }
-      }
-    }
-  }
 }
 void check_alarm(void)
 {
@@ -2646,30 +2702,51 @@ void check_alarm(void)
 }
 void alarm_done(void)
 {
-//  buzz();
-  lcd.print("IT IS");
-  lcd.setCursor(7, 0);
-  lcd.print(h2);
-  lcd.setCursor(8, 0);
-  lcd.print(h1);
-  lcd.setCursor(9, 0);
-  lcd.print(":");
-  lcd.setCursor(10, 0);
-  lcd.print(m2);
-  lcd.setCursor(11, 0);
-  lcd.print(m1);
+  buzz();
+  lock = false;  
+  previousLock = millis();
   if(format == 0)
   {
+    lcd.setCursor(1, 0);
+    lcd.print("IT IS");
+    lcd.setCursor(7, 0);
+    lcd.print(h2);
+    lcd.setCursor(8, 0);
+    lcd.print(h1);
+    lcd.setCursor(9, 0);
+    lcd.print(":");
+    lcd.setCursor(10, 0);
+    lcd.print(m2);
+    lcd.setCursor(11, 0);
+    lcd.print(m1);
     lcd.setCursor(12, 0);
     lcd.print(am_pm[ap]);
+    lcd.setCursor(14, 0);
+    lcd.print("!");
   }
-  lcd.setCursor(14, 0);
-  lcd.print("!");
+  else
+  {
+    lcd.setCursor(2, 0);
+    lcd.print("IT IS");
+    lcd.setCursor(8, 0);
+    lcd.print(h2);
+    lcd.setCursor(9, 0);
+    lcd.print(h1);
+    lcd.setCursor(10, 0);
+    lcd.print(":");
+    lcd.setCursor(11, 0);
+    lcd.print(m2);
+    lcd.setCursor(12, 0);
+    lcd.print(m1);
+    lcd.setCursor(13, 0);
+    lcd.print("!"); 
+  }
   lcd.setCursor(6, 1);
   lcd.print(">OK<");
   
   if(digitalRead(ctrlBtn) == LOW)
   {
+    digitalWrite(buzzer, LOW);
     lcd.clear();
     page = 1;   
   }
@@ -2809,13 +2886,13 @@ void next_char(String Direction, bool mode)
       }
     }
 
-    else
+    else if(Direction == "BACK")
     {
       lcd.setCursor(colWriting2, rowWritingChar2);
       lcd.print(" "); 
       if(userPhrase.length() > 0)
       {
-        userPhrase.remove(userPhrase.length() - 2);
+        userPhrase.remove(userPhrase.length() - 1);
         colWriting2--; 
         character = 0;
       }
@@ -3897,7 +3974,7 @@ void view_credits(void)
   if(credits_animation == false)
   {
     lcd.setCursor(colCredits, 1);
-    lcd.print("GRAPOTRONICS");
+    lcd.print("GRAPETRONICS");
     if(colCredits > 2)
     {
       erase(colCredits + 11 , 1, 0);
@@ -3930,4 +4007,54 @@ void view_credits(void)
       lcd.write(byte(4)); 
     }
   }
+}
+
+void power_saving_system()
+{
+    if(lock == false)
+  {
+    digitalWrite(transistor, HIGH);
+  }
+  
+  if(millis() - previousLock == 20000)
+  {
+    digitalWrite(transistor, LOW);
+    lock = true;
+    previousLock = millis();
+  }
+
+  if(digitalRead(upBtn) == LOW || digitalRead(downBtn) == LOW || digitalRead(rBtn) == LOW || digitalRead(lBtn) == LOW || digitalRead(ctrlBtn) == LOW)
+  {
+    lock = false;  
+    previousLock = millis();
+  }
+}
+
+void initialize_buzzer()
+{
+  if(started == true)
+  {
+    digitalWrite(buzzer, LOW);
+    started = false;
+  }
+}
+
+void buzz(){
+  digitalWrite(buzzer, LOW);
+ if(millis() - buzz_millis >= buzz_delay)
+ {  
+    buzz_counter++;
+    digitalWrite(buzzer, HIGH);
+    buzz_millis = millis();
+    if(buzz_counter == 3)
+    {
+      buzz_delay = 1400;
+      buzz_counter = -1;
+    }
+
+    else if(buzz_counter == 0)
+    {
+      buzz_delay = 300;
+    }
+ } 
 }
